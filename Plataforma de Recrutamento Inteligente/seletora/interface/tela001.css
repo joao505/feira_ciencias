@@ -135,3 +135,23 @@ nav {
     transform: scale(1.05);
 }
 
+section {
+    padding-top: var(--spacing-large);
+    padding-bottom: var(--spacing-large);
+}
+
+.features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacing-medium);
+    color: var(--color-text);
+}
+
+.features-card {
+    background-color: #f9fafb;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: 0 2px 8px var(--shadow-light);
+    display: flex;
+    
+}

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teleprompter para Palestras</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .speech-active {
+            animation: pulseHighlight 2s infinite;
+            background: linear-gradient(90deg, rgba(199,210,254,0.3) 0%, rgba(199,210,254,0.7) 50%, rgba(199,210,254,0.3) 100%);
+            border-left: 4px solid #6366f1;
+        }
+        @keyframes pulseHighlight {
+            0% { opacity: 1; }
+            50% { opacity: 0.8; }
+            100% { opacity: 1; }
+        }
+        .typing-cursor {
+            display: inline-block;
+            width: 10px;
+            height: 20px;
+            background: #6366f1;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Cabeçalho -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-indigo-400 mb-2">TELEPROMPTER AO VIVO</h1>
+            <p class="text-gray-400">Sua fala convertida em texto em tempo real</p>
+        </div>
+
+        <!-- Área Principal -->
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Controles -->
+            <div class="lg:w-1/4 bg-gray-800 p-6 rounded-xl shadow-lg">
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Idioma</label>
+                        <select id="language" class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="pt-BR">Português (BR)</option>
+                            <option value="en-US">Inglês (EUA)</option>
+                            <option value="es-ES">Espanhol</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Tamanho do Texto</label>
+                        <input id="fontSize" type="range" min="16" max="48" value="24" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                        <div class="flex justify-between text-xs text-gray-400 mt-1">
+                            <span>Pequeno</span>
+                            <span>Grande</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Velocidade de Rolagem</label>
+                        <input id="scrollSpeed" type="range" min="1" max="10" value="5" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                    </div>
+
+                    <div class="pt-4 space-y-4">
+                        <button id="startBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clip-rule="evenodd" />
+                            </svg>
+                            Iniciar Captura
+                        </button>
+                        <button id="stopBtn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center" disabled>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd" />
+                            </svg>
+                            Parar Captura
+                        </button>
+                    </div>
+
+                    <div class="pt-4 border-t border-gray-700">
+                        <button id="clearBtn" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg">
+                            Limpar Tudo
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Teleprompter -->
+            <div class="lg:w-3/4 flex flex-col">
+                <div class="bg-gray-800 rounded-xl shadow-lg overflow-hidden flex-grow">
+                    <div id="transcriptDisplay" class="h-full p-8 overflow-y-auto" style="font-size: 24px;">
+                        <div id="transcriptContent" class="space-y-4">
+                            <p class="text-center text-gray-500 py-20">Seu texto aparecerá aqui enquanto você fala...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controles de Teleprompter -->
+                <div class="bg-gray-800 rounded-xl shadow-lg mt-4 p-4 flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <button id="scrollUpBtn" class="p-2 rounded-full bg-gray-700 hover:bg-gray-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                            </svg>
+                        </button>
+                        <button id="scrollDownBtn" class="p-2 rounded-full bg-gray-700 hover:bg-gray-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="text-sm text-gray-400">
+                        <span id="wordCount">0</span> palavras
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Elementos DOM
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const transcriptContent = document.getElementById('transcriptContent');
+        const transcriptDisplay = document.getElementById('transcriptDisplay');
+        const languageSelect = document.getElementById('language');
+        const fontSizeSlider = document.getElementById('fontSize');
+        const scrollSpeedSlider = document.getElementById('scrollSpeed');
+        const scrollUpBtn = document.getElementById('scrollUpBtn');
+        const scrollDownBtn = document.getElementById('scrollDownBtn');
+        const wordCountSpan = document.getElementById('wordCount');
+
+        // Variáveis de estado
+        let recognition;
+        let isListening = false;
+        let fullTranscript = '';
+        let currentParagraph = null;
+        let autoScrollEnabled = true;
+        let scrollInterval;
+
+        // Inicializa o reconhecimento de fala
+        function initSpeechRecognition() {
+            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = languageSelect.value;
+
+            recognition.onstart = () => {
+                isListening = true;
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                transcriptContent.innerHTML = '';
+                currentParagraph = createNewParagraph();
+                startAutoScroll();
+            };
+
+            recognition.onend = () => {
+                if (isListening) {
+                    recognition.start(); // Reconecta se ainda estiver ativo
+                } else {
+                    stopBtn.disabled = true;
+                    startBtn.disabled = false;
+                    stopAutoScroll();
+                }
+            };
+
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                let finalTranscript = '';
+
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript;
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+
+                // Processa o texto final
+                if (finalTranscript) {
+                    fullTranscript += ' ' + finalTranscript;
+                    updateWordCount();
+                    
+                    // Remove o cursor de digitação se existir
+                    const typingCursor = currentParagraph.querySelector('.typing-cursor');
+                    if (typingCursor) typingCursor.remove();
+                    
+                    // Adiciona o texto final
+                    const span = document.createElement('span');
+                    span.textContent = finalTranscript;
+                    currentParagraph.appendChild(span);
+                    
+                    // Cria novo parágrafo para a próxima fala
+                    currentParagraph = createNewParagraph();
+                }
+
+                // Processa o texto intermediário
+                if (interimTranscript) {
+                    // Remove o texto intermediário anterior
+                    const existingInterim = currentParagraph.querySelector('.interim');
+                    if (existingInterim) existingInterim.remove();
+                    
+                    // Adiciona o novo texto intermediário
+                    const interimSpan = document.createElement('span');
+                    interimSpan.textContent = interimTranscript;
+                    interimSpan.className = 'interim text-indigo-300';
+                    currentParagraph.appendChild(interimSpan);
+                    
+                    // Adiciona cursor de digitação
+                    const typingCursor = document.createElement('span');
+                    typingCursor.className = 'typing-cursor';
+                    currentParagraph.appendChild(typingCursor);
+                }
+
+                // Destaca o parágrafo atual
+                highlightCurrentParagraph();
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Erro no reconhecimento:', event.error);
+                if (event.error === 'no-speech' || event.error === 'audio-capture') {
+                    alert('Microfone não detectado. Verifique suas configurações de áudio.');
+                }
+            };
+        }
+
+        // Cria um novo parágrafo para a fala
+        function createNewParagraph() {
+            const paragraph = document.createElement('p');
+            paragraph.className = 'speech-paragraph leading-relaxed';
+            transcriptContent.appendChild(paragraph);
+            
+            // Rolagem suave para o novo parágrafo
+            if (autoScrollEnabled) {
+                setTimeout(() => {
+                    paragraph.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 100);
+            }
+            
+            return paragraph;
+        }
+
+        // Destaca o parágrafo atual sendo falado
+        function highlightCurrentParagraph() {
+            // Remove destaque de todos os parágrafos
+            document.querySelectorAll('.speech-paragraph').forEach(p => {
+                p.classList.remove('speech-active');
+                p.classList.remove('text-gray-400');
+            });
+            
+            // Destaca o parágrafo atual
+            if (currentParagraph) {
+                currentParagraph.classList.add('speech-active');
+            }
+            
+            // Escurece parágrafos anteriores
+            const paragraphs = document.querySelectorAll('.speech-paragraph');
+            for (let i = 0; i < paragraphs.length - 1; i++) {
+                paragraphs[i].classList.add('text-gray-400');
+            }
+        }
+
+        // Atualiza contagem de palavras
+        function updateWordCount() {
+            const wordCount = fullTranscript.trim() ? fullTranscript.trim().split(/\s+/).length : 0;
+            wordCountSpan.textContent = wordCount;
+        }
+
+        // Rolagem automática
+        function startAutoScroll() {
+            const speed = 11 - scrollSpeedSlider.value; // Inverte a escala (1=lento, 10=rápido)
+            scrollInterval = setInterval(() => {
+                if (autoScrollEnabled) {
+                    transcriptDisplay.scrollBy(0, 1);
+                }
+            }, speed * 10);
+        }
+
+        function stopAutoScroll() {
+            clearInterval(scrollInterval);
+        }
+
+        // Event Listeners
+        startBtn.addEventListener('click', () => {
+            if (!recognition) initSpeechRecognition();
+            recognition.lang = languageSelect.value;
+            recognition.start();
+        });
+
+        stopBtn.addEventListener('click', () => {
+            isListening = false;
+            recognition.stop();
+        });
+
+        clearBtn.addEventListener('click', () => {
+            transcriptContent.innerHTML = '<p class="text-center text-gray-500 py-20">Seu texto aparecerá aqui enquanto você fala...</p>';
+            fullTranscript = '';
+            updateWordCount();
+        });
+
+        languageSelect.addEventListener('change', () => {
+            if (isListening) {
+                recognition.stop();
+                setTimeout(() => {
+                    recognition.lang = languageSelect.value;
+                    recognition.start();
+                }, 100);
+            } else if (recognition) {
+                recognition.lang = languageSelect.value;
+            }
+        });
+
+        fontSizeSlider.addEventListener('input', () => {
+            transcriptDisplay.style.fontSize = `${fontSizeSlider.value}px`;
+        });
+
+        scrollSpeedSlider.addEventListener('input', () => {
+            if (isListening) {
+                stopAutoScroll();
+                startAutoScroll();
+            }
+        });
+
+        scrollUpBtn.addEventListener('click', () => {
+            autoScrollEnabled = false;
+            transcriptDisplay.scrollBy(0, -50);
+        });
+
+        scrollDownBtn.addEventListener('click', () => {
+            autoScrollEnabled = false;
+            transcriptDisplay.scrollBy(0, 50);
+        });
+
+        transcriptDisplay.addEventListener('scroll', () => {
+            autoScrollEnabled = false;
+        });
+
+        // Verifica suporte a API
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+            startBtn.disabled = true;
+            alert('Seu navegador não suporta reconhecimento de voz. Use Chrome ou Edge.');
+        }
+    </script>
+</body>
+</html>
