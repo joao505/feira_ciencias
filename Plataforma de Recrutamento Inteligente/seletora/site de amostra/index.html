@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tech Solutions Pro - Tecnologia Profissional</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&display=swap" rel="stylesheet" />
+</head>
+
+<body>
+  <header role="banner">
+    <div class="container">
+      <nav role="navigation" aria-label="Main navigation" class="nav-bar">
+        <div class="logo" tabindex="0" aria-label="Tech Solutions Pro logo">Tech Solutions Pro</div>
+        <div class="nav-links">
+          <a href="#services" tabindex="0">Serviços</a>
+          <a href="#about" tabindex="0">Sobre Nós</a>
+          <a href="#contact" tabindex="0">Contato</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" role="region" aria-label="Seção principal">
+      <div class="container">
+        <h1>Inovação em Tecnologia para o Seu Negócio</h1>
+        <p>Transformamos ideias em soluções digitais profissionais e de alta performance.</p>
+        <button class="btn-primary" aria-label="Começar agora">Comece Agora</button>
+      </div>
+    </section>
+
+    <section id="services" class="container" role="region" aria-labelledby="services-title">
+      <h2 id="services-title" style="color: var(--color-primary); font-weight: 700; font-size: 2rem; margin-bottom: 2rem; text-align:center;">Nossos Serviços</h2>
+      <div class="features">
+        <article class="feature-card" tabindex="0" aria-label="Desenvolvimento Web">
+          <div class="feature-icon" aria-hidden="true">💻</div>
+          <h3 class="feature-title">Desenvolvimento Web</h3>
+          <p class="feature-desc">Construímos websites modernos, responsivos e otimizados para desempenho e SEO.</p>
+        </article>
+        <article class="feature-card" tabindex="0" aria-label="Consultoria em TI">
+          <div class="feature-icon" aria-hidden="true">🛠️</div>
+          <h3 class="feature-title">Consultoria em TI</h3>
+          <p class="feature-desc">Orientação especializada para potencializar sua infraestrutura de tecnologia.</p>
+        </article>
+        <article class="feature-card" tabindex="0" aria-label="Soluções em Nuvem">
+          <div class="feature-icon" aria-hidden="true">☁️</div>
+          <h3 class="feature-title">Soluções em Nuvem</h3>
+          <p class="feature-desc">Migração e gerenciamento de serviços na nuvem para agilidade e escalabilidade.</p>
+        </article>
+        <article class="feature-card" tabindex="0" aria-label="Segurança da Informação">
+          <div class="feature-icon" aria-hidden="true">🔒</div>
+          <h3 class="feature-title">Segurança da Informação</h3>
+          <p class="feature-desc">Proteção avançada para dados e sistemas, garantindo confiabilidade e conformidade.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="about" class="about" role="region" aria-labelledby="about-title">
+      <h2 id="about-title">Sobre a Tech Solutions Pro</h2>
+      <p>Com anos de experiência no mercado de tecnologia, a Tech Solutions Pro tem como missão oferecer soluções inovadoras e confiáveis para empresas de todos os tamanhos. Nosso time é formado por especialistas apaixonados por tecnologia que trabalham para oferecer o melhor em desenvolvimento, consultoria e suporte.</p>
+    </section>
+
+    <section id="contact" class="contact" role="region" aria-labelledby="contact-title">
+      <h2 id="contact-title">Fale Conosco</h2>
+      <form aria-label="Formulário de contato da Tech Solutions Pro" onsubmit="handleSubmit(event)">
+        <label for="name">Nome</label>
+        <input type="text" id="name" name="name" required aria-required="true" placeholder="Seu nome" autocomplete="name" />
+
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required aria-required="true" placeholder="seuemail@exemplo.com" autocomplete="email" />
+
+        <label for="message">Mensagem</label>
+        <textarea id="message" name="message" rows="4" required aria-required="true" placeholder="Escreva sua mensagem aqui"></textarea>
+
+        <button type="submit">Enviar Mensagem</button>
+      </form>
+      <p id="responseMessage" role="alert" style="color: var(--color-primary); font-weight: 600; margin-top:1rem;"></p>
+    </section>
+  </main>
+
+  <footer>
+    &copy; 2024 Tech Solutions Pro. Todos os direitos reservados.
+  </footer>
+
+  <script>
+    function handleSubmit(event) {
+      event.preventDefault();
+      const responseMessage = document.getElementById('responseMessage');
+      responseMessage.textContent = '';
+
+      const name = event.target.name.value.trim();
+      const email = event.target.email.value.trim();
+      const message = event.target.message.value.trim();
+
+      if (!name || !email || !message) {
+        responseMessage.textContent = 'Por favor, preencha todos os campos.';
+        return;
+      }
+
+      // Simple email validation
+      const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+      if (!emailRegex.test(email)) {
+        responseMessage.textContent = 'Por favor, insira um email válido.';
+        return;
+      }
+
+      // Simulate form submission delay
+      responseMessage.textContent = 'Enviando mensagem...';
+
+      setTimeout(() => {
+        responseMessage.textContent = 'Mensagem enviada com sucesso! Entraremos em contato em breve.';
+        event.target.reset();
+      }, 1500);
+    }
+  </script>
+</body>
+</html>
+
